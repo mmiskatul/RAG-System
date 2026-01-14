@@ -3,21 +3,8 @@ from langchain_community.document_loaders import TextLoader,DirectoryLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_chroma import Chroma 
 from sentence_transformers import SentenceTransformer
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
-
-
-# sentences = [
-#     "That is a happy person",
-#     "That is a happy dog",
-#     "That is a very happy person",
-#     "Today is a sunny day"
-# ]
-# embeddings = model.encode(sentences)
-
-# similarities = model.similarity(embeddings, embeddings)
-# print(similarities.shape)
-# # [4, 4]
 
 def load_documents(docs_path="docs"):
     """Load the text files from the docs directory"""
@@ -77,8 +64,11 @@ def create_vector_store(chunks, persist_directory="db/chroma_db"):
     """Create and persist ChromaDB vector store"""
     print("Creating embeddings and storing in ChromaDB")
 
-    # Wrap SentenceTransformer in LangChain embeddings
-    embedding_model = SentenceTransformerEmbeddings(model_name="BAAI/bge-m3")
+    # Hugging Face wrapper for LangChain
+    embedding_model = HuggingFaceEmbeddings(
+        model_name="BAAI/bge-m3",  
+        model_kwargs={"device": "cpu"}  
+    )
     
     # Create ChromaDB vector store
     print("--- Creating vector store ---")
@@ -86,7 +76,7 @@ def create_vector_store(chunks, persist_directory="db/chroma_db"):
         documents=chunks,
         embedding=embedding_model,
         persist_directory=persist_directory,
-        collection_metadata={"hnsw:space": "cosine"}  # optional metadata
+        collection_metadata={"hnsw:space": "cosine"}  # optional
     )
     print("--- Finished creating vector store ---")
     
@@ -102,7 +92,7 @@ def main():
     chucks =split_documents(documents)
     
     # embedding and store in vector database 
-    vectorstore = create_vector_store(chucks)
+    vectorstore =create_vector_store(chucks)
 
 if __name__ == "__main__" :
     main()

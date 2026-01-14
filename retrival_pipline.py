@@ -44,3 +44,19 @@ Documents:
 Please Provide a clear , helpful answer using only the information from these documents If you can't find the answer in the documents , say "I don't have enough information to answer the question based on the provided documents 
 """
 
+
+
+# -----------------------------
+# 3️⃣ Generate Answer
+# -----------------------------
+def generate_answer(prompt):
+    """Use a local LLM to generate an answer"""
+    generator = pipeline("text-generation", model="meta-llama/Meta-Llama-3-8B")      
+    response = generator(prompt, return_full_text=False)
+    return response[0]["generated_text"]
+
+print("\n=== Generating Answer ===")
+answer = generate_answer(combine_input)
+
+print("\n=== Final Answer ===")
+print(answer)

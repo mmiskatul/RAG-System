@@ -1,6 +1,6 @@
 from langchain_chroma import Chroma 
 from langchain_huggingface import HuggingFaceEmbeddings 
-
+from transformers import pipeline
 
 persistent_directory ="db/chroma_db"
 
@@ -15,7 +15,7 @@ db =Chroma(
     collection_metadata={"hnsw:space": "cosine"} 
 )
 
-query ="which island does SpaceX lease for its launches in the Pacific?"
+query ="In what year did Tesla begin production of the roadster?"
 
 retriver =db.as_retriever(search_kwargs={"k":5})
 
@@ -28,8 +28,19 @@ retriver =db.as_retriever(search_kwargs={"k":5})
 # )
 
 relevant_docs  =retriver.invoke(query)
-
+print(f"User Query : {query}")
 print("--- Context ---")
 
 for i,doc in enumerate(relevant_docs,1):
     print(f"Document {i}:\n{doc.page_content}\n")
+    
+    
+## COMBINE the query and relavant document contents 
+combine_input = f"""Base on the following documents ,please answer this question {query}
+
+Documents: 
+{chr(10).join([f"-{doc.page_content}" for doc in relevant_docs])}
+
+Please Provide a clear , helpful answer using only the information from these documents If you can't find the answer in the documents , say "I don't have enough information to answer the question based on the provided documents 
+"""
+

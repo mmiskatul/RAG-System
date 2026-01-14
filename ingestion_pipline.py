@@ -3,8 +3,9 @@ from langchain_community.document_loaders import TextLoader,DirectoryLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_chroma import Chroma 
 from sentence_transformers import SentenceTransformer
+from langchain.embeddings import SentenceTransformerEmbeddings
 
-# model = SentenceTransformer("BAAI/bge-m3")
+
 
 # sentences = [
 #     "That is a happy person",
@@ -72,6 +73,25 @@ def split_documents(documents,chunk_size=800,chunk_overlap=0):
             print(f"\n... and {len(chunks)-5} more chunks")
     return chunks
  
+def create_vector_store(chunks, persist_directory="db/chroma_db"):
+    """Create and persist ChromaDB vector store"""
+    print("Creating embeddings and storing in ChromaDB")
+
+    # Wrap SentenceTransformer in LangChain embeddings
+    embedding_model = SentenceTransformerEmbeddings(model_name="BAAI/bge-m3")
+    
+    # Create ChromaDB vector store
+    print("--- Creating vector store ---")
+    vector_store = Chroma.from_documents(
+        documents=chunks,
+        embedding=embedding_model,
+        persist_directory=persist_directory,
+        collection_metadata={"hnsw:space": "cosine"}  # optional metadata
+    )
+    print("--- Finished creating vector store ---")
+    
+    return vector_store
+
 def main():
     print("main function")
     
@@ -80,6 +100,9 @@ def main():
     
     #chucking the file 
     chucks =split_documents(documents)
+    
+    # embedding and store in vector database 
+    vectorstore = create_vector_store(chucks)
 
 if __name__ == "__main__" :
     main()

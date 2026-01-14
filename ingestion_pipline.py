@@ -49,12 +49,37 @@ def load_documents(docs_path="docs"):
     
     return documents
 
+def split_documents(documents,chunk_size=800,chunk_overlap=0):
+    """Split documents into smaller chunck with overlap"""
+    print("Splitting documents into chunk")
+    
+    text_splitter =CharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
+    )
+    chunks =text_splitter.split_documents(documents)
+    
+    if chunks:
+        
+        for i,chunk in enumerate(chunks[:5]):
+            print(f"\n--- Chunk {i+1}")
+            print(f"Source: {chunk.metadata['source']}")
+            print(f"Length: {len(chunk.page_content)} characters")
+            print(f"Context:")
+            print(chunk.page_content)
+            print("-"*50)
+        if len(chunks)>5 : 
+            print(f"\n... and {len(chunks)-5} more chunks")
+    return chunks
  
 def main():
     print("main function")
     
     #load the file 
     documents =load_documents(docs_path="docs")
+    
+    #chucking the file 
+    chucks =split_documents(documents)
 
 if __name__ == "__main__" :
     main()
